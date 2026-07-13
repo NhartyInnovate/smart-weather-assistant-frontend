@@ -5,7 +5,8 @@ import { LoadingOverlay } from "@/components/weather/LoadingOverlay";
 import { ErrorCard } from "@/components/weather/ErrorCard";
 import { WeatherCard } from "@/components/weather/WeatherCard";
 import { RecommendationCard } from "@/components/weather/RecommendationCard";
-import { computeDayNight, normalizeCondition, useWeatherTheme } from "@/contexts/ThemeContext";
+import { useWeatherTheme } from "@/contexts/ThemeContext";
+import { mapWeatherCode } from "@/lib/weatherThemeMapper";
 import { fetchWeather } from "@/services/weatherService";
 import type { WeatherResponse } from "@/types/weather";
 
@@ -25,7 +26,11 @@ export function WeatherSearch() {
       setData(res);
       setFetchedAt(Date.now());
       setStatus("success");
-      setWeather(normalizeCondition(res.weather.condition), computeDayNight(res.location.local_time));
+      const condition = mapWeatherCode(res.weather.weather_code);
+
+      const dayNight = res.weather.is_day ? "day" : "night";
+      
+      setWeather(condition, dayNight);
     } catch (err) {
       console.error(err);
       setStatus("error");
