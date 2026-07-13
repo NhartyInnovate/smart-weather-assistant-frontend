@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import type { DayNight, ThemeDefinition, WeatherCondition } from "@/types/weather";
-import { mapWeatherCode } from "@/lib/weatherThemeMapper";
 
 const THEMES: Record<WeatherCondition, ThemeDefinition> = {
   Sunny: {
@@ -86,6 +85,31 @@ const CYCLE_ORDER: WeatherCondition[] = [
   "Overcast",
 ];
 
+export function normalizeCondition(raw: string): WeatherCondition {
+  const s = raw.toLowerCase();
+
+  if (s.includes("thunder")) return "Thunderstorm";
+  if (s.includes("snow")) return "Snow";
+  if (s.includes("rain") || s.includes("drizzle") || s.includes("shower"))
+    return "Rain";
+  if (s.includes("fog") || s.includes("mist") || s.includes("haze"))
+    return "Fog";
+  if (s.includes("overcast")) return "Overcast";
+  if (s.includes("partly") || s.includes("cloud"))
+    return "Partly Cloudy";
+
+  return "Sunny";
+}
+
+export function computeDayNight(localTime?: string): DayNight {
+  const d = localTime ? new Date(localTime) : new Date();
+
+  const hour = Number.isNaN(d.getHours())
+    ? new Date().getHours()
+    : d.getHours();
+
+  return hour >= 6 && hour < 19 ? "day" : "night";
+}
 
 interface ThemeContextValue {
   condition: WeatherCondition;
@@ -106,40 +130,62 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isCycling) return;
+
     let i = 0;
+
     const id = setInterval(() => {
       i = (i + 1) % CYCLE_ORDER.length;
       setCondition(CYCLE_ORDER[i]);
     }, 9000);
+
     return () => clearInterval(id);
   }, [isCycling]);
 
-  const setWeather = useCallback((c: WeatherCondition, dn: DayNight) => {
-    setIsCycling(false);
-    setCondition(c);
-    setDayNight(dn);
-  }, []);
+  const setWeather = useCallback(
+    (condition: WeatherCondition, dayNight: DayNight) => {
+      setIsCycling(false);
+      setCondition(condition);
+      setDayNight(dayNight);
+    },
+    []
+  );
 
-  const stopCycle = useCallback(() => setIsCycling(false), []);
+  const stopCycle = useCallback(() => {
+    setIsCycling(false);
+  }, []);
 
   const value = useMemo<ThemeContextValue>(() => {
     const theme = THEMES[condition];
+
     return {
       condition,
       dayNight,
       theme,
-      gradient: dayNight === "day" ? theme.gradientDay : theme.gradientNight,
+      gradient:
+        dayNight === "day"
+          ? theme.gradientDay
+          : theme.gradientNight,
       isCycling,
       setWeather,
       stopCycle,
     };
   }, [condition, dayNight, isCycling, setWeather, stopCycle]);
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useWeatherTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useWeatherTheme must be used inside ThemeProvider");
+
+  if (!ctx) {
+    throw new Error(
+      "useWeatherTheme must be used inside ThemeProvider"
+    );
+  }
+
   return ctx;
 }
