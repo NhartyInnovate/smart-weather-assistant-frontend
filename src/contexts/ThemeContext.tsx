@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { DayNight, ThemeDefinition, WeatherCondition } from "@/types/weather";
+import { mapWeatherCode } from "@/lib/weatherThemeMapper";
 
 const THEMES: Record<WeatherCondition, ThemeDefinition> = {
   Sunny: {
@@ -85,22 +86,6 @@ const CYCLE_ORDER: WeatherCondition[] = [
   "Overcast",
 ];
 
-export function normalizeCondition(raw: string): WeatherCondition {
-  const s = raw.toLowerCase();
-  if (s.includes("thunder")) return "Thunderstorm";
-  if (s.includes("snow")) return "Snow";
-  if (s.includes("rain") || s.includes("drizzle") || s.includes("shower")) return "Rain";
-  if (s.includes("fog") || s.includes("mist") || s.includes("haze")) return "Fog";
-  if (s.includes("overcast")) return "Overcast";
-  if (s.includes("partly") || s.includes("cloud")) return "Partly Cloudy";
-  return "Sunny";
-}
-
-export function computeDayNight(localTime?: string): DayNight {
-  const d = localTime ? new Date(localTime) : new Date();
-  const hour = Number.isNaN(d.getHours()) ? new Date().getHours() : d.getHours();
-  return hour >= 6 && hour < 19 ? "day" : "night";
-}
 
 interface ThemeContextValue {
   condition: WeatherCondition;
