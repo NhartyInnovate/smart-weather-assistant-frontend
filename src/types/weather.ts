@@ -1,16 +1,31 @@
+export interface Measurement {
+  value: number;
+  unit: string;
+}
+
 export interface WeatherResponse {
   location: {
     city: string;
     country: string;
-    local_time?: string;
+    timezone: string;
   };
+
   weather: {
-    temperature: { value: number; unit: string };
-    humidity: { value: number; unit: string };
-    wind_speed: { value: number; unit: string };
+    temperature: Measurement;
+    humidity: Measurement;
+    wind_speed: Measurement;
+
     condition: string;
+    weather_code: number;
+    is_day: boolean;
   };
+
   advice: string;
+
+  metadata: {
+    local_time: string;
+    last_updated: string;
+  };
 }
 
 export type WeatherCondition =
