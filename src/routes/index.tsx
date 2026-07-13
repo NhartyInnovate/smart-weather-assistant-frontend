@@ -1,24 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { WeatherBackground } from "@/components/weather/WeatherBackground";
+import { Navbar } from "@/components/common/Navbar";
+import { Hero } from "@/sections/Hero";
+import { Features } from "@/sections/Features";
+import { HowItWorks } from "@/sections/HowItWorks";
+import { Testimonials } from "@/sections/Testimonials";
+import { WeatherSearch } from "@/sections/WeatherSearch";
+import { Footer } from "@/sections/Footer";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Smart Weather Assistant — Experience the weather" },
+      {
+        name: "description",
+        content:
+          "A premium weather experience with live conditions, dynamic themes and smart recommendations.",
+      },
+      { property: "og:title", content: "Smart Weather Assistant" },
+      {
+        property: "og:description",
+        content: "Experience the weather, not just the forecast.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <ThemeProvider>
+      <div className="relative min-h-screen">
+        <WeatherBackground />
+        <Navbar />
+        <main>
+          <Hero />
+          <Features />
+          <HowItWorks />
+          <Testimonials />
+          <WeatherSearch />
+        </main>
+        <Footer />
+      </div>
+    </ThemeProvider>
   );
 }
