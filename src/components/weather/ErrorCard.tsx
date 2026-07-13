@@ -8,24 +8,41 @@ interface Props {
 export function ErrorCard({ onRetry }: Props) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="mx-auto max-w-md rounded-3xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-xl"
+      initial={{ opacity: 0, scale: 0.98, y: 15 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative mx-auto max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-3xl"
+      role="alert"
+      aria-live="assertive"
     >
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/15">
-        <CloudOff className="text-white" aria-hidden />
-      </div>
-      <h3 className="mt-4 text-xl font-semibold text-white">We couldn't find that city</h3>
-      <p className="mt-2 text-sm text-white/70">
-        Try another spelling or a nearby city — the skies are just a search away.
-      </p>
-      <button
-        onClick={onRetry}
-        className="mt-6 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:bg-white/90"
+      {/* Top micro-highlight glass line */}
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
+      {/* Bobbing animated cloud offline icon */}
+      <motion.div
+        className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 text-white/80 shadow-inner"
+        animate={{ y: [-4, 4, -4] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       >
-        Try again
-      </button>
+        <CloudOff className="text-white/80" size={24} aria-hidden />
+      </motion.div>
+
+      <h3 className="mt-6 text-xl font-light tracking-tight text-white sm:text-2xl">
+        We couldn't reach that city
+      </h3>
+      <p className="mt-3 text-sm leading-relaxed text-white/60">
+        Check spelling, search for a broader region, or try a major global city. The skies are just
+        a keystroke away.
+      </p>
+
+      <motion.button
+        onClick={onRetry}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        className="mt-6 w-full rounded-2xl bg-white py-3 text-sm font-semibold text-slate-900 shadow-xl transition-colors hover:bg-slate-100"
+      >
+        Try another search
+      </motion.button>
     </motion.div>
   );
 }

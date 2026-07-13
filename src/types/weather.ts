@@ -29,13 +29,7 @@ export interface WeatherResponse {
 }
 
 export type WeatherCondition =
-  | "Sunny"
-  | "Partly Cloudy"
-  | "Overcast"
-  | "Rain"
-  | "Thunderstorm"
-  | "Snow"
-  | "Fog";
+  "Sunny" | "Partly Cloudy" | "Overcast" | "Rain" | "Thunderstorm" | "Snow" | "Fog";
 
 export type DayNight = "day" | "night";
 

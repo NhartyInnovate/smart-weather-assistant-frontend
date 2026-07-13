@@ -29,7 +29,7 @@ export function WeatherSearch() {
       const condition = mapWeatherCode(res.weather.weather_code);
 
       const dayNight = res.weather.is_day ? "day" : "night";
-      
+
       setWeather(condition, dayNight);
     } catch (err) {
       console.error(err);
@@ -56,17 +56,35 @@ export function WeatherSearch() {
         <div className="mt-12">
           <AnimatePresence mode="wait">
             {status === "loading" && (
-              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
                 <LoadingOverlay />
               </motion.div>
             )}
             {status === "error" && (
-              <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
                 <ErrorCard onRetry={() => setStatus("idle")} />
               </motion.div>
             )}
             {status === "success" && data && (
-              <motion.div key="success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -25, filter: "blur(4px)" }}
+                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+              >
                 <WeatherCard data={data} fetchedAt={fetchedAt} />
                 <RecommendationCard advice={data.advice} />
               </motion.div>
