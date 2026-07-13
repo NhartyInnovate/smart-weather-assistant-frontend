@@ -110,78 +110,138 @@ function generateMockWeather(city: string): WeatherResponse {
 }
 
 export async function fetchWeather(city: string): Promise<WeatherResponse> {
-  // 1. Try backend server if it is configured to a non-localhost address
-  if (!BASE_URL.includes("localhost") && !BASE_URL.includes("127.0.0.1")) {
-    try {
-      const url = `${BASE_URL}/weather?city=${encodeURIComponent(city)}`;
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
-      if (res.ok) {
-        return (await res.json()) as WeatherResponse;
-      }
-    } catch (e) {
-      console.warn("Primary backend fetch failed, falling back to Open-Meteo:", e);
-    }
+  const trimmed = city.trim();
+  if (!trimmed) {
+    throw new Error("CITY_NOT_FOUND");
   }
 
-  // 2. Try Open-Meteo free public API fallback
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
   try {
-    // A. Geocode the city
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-    const geoRes = await fetch(geoUrl);
-    if (geoRes.ok) {
+    // 1. Try backend server if it is configured to a non-localhost address
+    if (!BASE_URL.includes("localhost") && !BASE_URL.includes("127.0.0.1")) {
+      try {
+        const url = `${BASE_URL}/weather?city=${encodeURIComponent(trimmed)}`;
+        const res = await fetch(url, {
+          headers: { Accept: "application/json" },
+          signal: controller.signal,
+        });
+        if (res.status === 404) {
+          throw new Error("CITY_NOT_FOUND");
+        }
+        if (res.status >= 500) {
+          throw new Error("BACKEND_UNAVAILABLE");
+        }
+        if (res.ok) {
+          return (await res.json()) as WeatherResponse;
+        }
+      } catch (e) {
+        const error = e as Error;
+        if (error.name === "AbortError") {
+          throw new Error("TIMEOUT");
+        }
+        if (error.message === "CITY_NOT_FOUND" || error.message === "BACKEND_UNAVAILABLE") {
+          throw error;
+        }
+        console.warn("Primary backend fetch failed, falling back to Open-Meteo:", e);
+      }
+    }
+
+    // 2. Try Open-Meteo free public API fallback
+    try {
+      // A. Geocode the city
+      const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=1&language=en&format=json`;
+      let geoRes;
+      try {
+        geoRes = await fetch(geoUrl, { signal: controller.signal });
+      } catch (err) {
+        const error = err as Error;
+        if (error.name === "AbortError") {
+          throw new Error("TIMEOUT");
+        }
+        throw new Error("NETWORK_ERROR");
+      }
+
+      if (!geoRes.ok) {
+        throw new Error("BACKEND_UNAVAILABLE");
+      }
+
       const geoData = await geoRes.json();
-      if (geoData.results && geoData.results.length > 0) {
-        const location = geoData.results[0];
-        const { latitude, longitude, name, country, timezone } = location;
+      if (!geoData.results || geoData.results.length === 0) {
+        throw new Error("CITY_NOT_FOUND");
+      }
 
-        // B. Fetch forecast
-        const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m&timezone=${encodeURIComponent(timezone || "auto")}`;
-        const forecastRes = await fetch(forecastUrl);
-        if (forecastRes.ok) {
-          const forecastData = await forecastRes.json();
-          const current = forecastData.current;
+      const location = geoData.results[0];
+      const { latitude, longitude, name, country, timezone } = location;
 
-          const weatherCode = current.weather_code;
-          const condition = mapWeatherCode(weatherCode);
+      // B. Fetch forecast
+      const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m&timezone=${encodeURIComponent(timezone || "auto")}`;
+      let forecastRes;
+      try {
+        forecastRes = await fetch(forecastUrl, { signal: controller.signal });
+      } catch (err) {
+        const error = err as Error;
+        if (error.name === "AbortError") {
+          throw new Error("TIMEOUT");
+        }
+        throw new Error("NETWORK_ERROR");
+      }
 
-          const now = new Date();
-          const localTimeStr = now.toLocaleTimeString([], {
+      if (!forecastRes.ok) {
+        throw new Error("BACKEND_UNAVAILABLE");
+      }
+
+      const forecastData = await forecastRes.json();
+      const current = forecastData.current;
+
+      const weatherCode = current.weather_code;
+      const condition = mapWeatherCode(weatherCode);
+
+      const now = new Date();
+      const localTimeStr = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: timezone,
+      });
+
+      return {
+        location: {
+          city: name,
+          country: country || "Unknown",
+          timezone: timezone || "UTC",
+        },
+        weather: {
+          temperature: { value: Math.round(current.temperature_2m), unit: "°C" },
+          humidity: { value: current.relative_humidity_2m, unit: "%" },
+          wind_speed: { value: Math.round(current.wind_speed_10m), unit: "km/h" },
+          condition,
+          weather_code: weatherCode,
+          is_day: current.is_day === 1,
+        },
+        advice: ADVICE_MAP[condition] || "Enjoy your day, whatever the weather!",
+        metadata: {
+          local_time: localTimeStr,
+          last_updated: now.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-            timeZone: timezone,
-          });
-
-          return {
-            location: {
-              city: name,
-              country: country || "Unknown",
-              timezone: timezone || "UTC",
-            },
-            weather: {
-              temperature: { value: Math.round(current.temperature_2m), unit: "°C" },
-              humidity: { value: current.relative_humidity_2m, unit: "%" },
-              wind_speed: { value: Math.round(current.wind_speed_10m), unit: "km/h" },
-              condition,
-              weather_code: weatherCode,
-              is_day: current.is_day === 1,
-            },
-            advice: ADVICE_MAP[condition] || "Enjoy your day, whatever the weather!",
-            metadata: {
-              local_time: localTimeStr,
-              last_updated: now.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              }),
-            },
-          };
-        }
+            second: "2-digit",
+          }),
+        },
+      };
+    } catch (e) {
+      const error = e as Error;
+      if (
+        error.message === "CITY_NOT_FOUND" ||
+        error.message === "BACKEND_UNAVAILABLE" ||
+        error.message === "TIMEOUT" ||
+        error.message === "NETWORK_ERROR"
+      ) {
+        throw error;
       }
+      throw new Error("NETWORK_ERROR");
     }
-  } catch (e) {
-    console.warn("Open-Meteo fallback failed, using local deterministic generator:", e);
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  // 3. Fallback to clean seed-based deterministic generator
-  return generateMockWeather(city);
 }

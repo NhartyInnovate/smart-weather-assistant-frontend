@@ -8,7 +8,7 @@ const ITEMS = [
   },
   {
     quote: "The theme transitions are pure magic. Feels like weather with a soul.",
-    name: "Kenji T.",
+    name: "Nkay Labs",
     role: "Product Lead",
   },
   {

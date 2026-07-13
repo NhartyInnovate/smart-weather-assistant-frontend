@@ -371,7 +371,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
       initial={{ opacity: 0, scale: 0.97, y: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="mx-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-white shadow-2xl backdrop-blur-3xl sm:p-10"
+      className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 text-white shadow-2xl backdrop-blur-3xl sm:p-10"
       aria-label={`Weather in ${location.city}, ${location.country}`}
     >
       {/* Top micro-highlight glass line */}
@@ -389,12 +389,14 @@ export function WeatherCard({ data, fetchedAt }: Props) {
         </div>
         <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium tracking-wide text-white/70 backdrop-blur-md">
           <Clock size={12} aria-hidden />
-          <span>Local Time: {formatLocalTime(location.local_time)}</span>
+          <span className="whitespace-nowrap">
+            Local Time: {formatLocalTime(location.local_time)}
+          </span>
         </div>
       </header>
 
       {/* Main Stats Block */}
-      <div className="mt-10 flex flex-col items-center justify-between gap-6 sm:flex-row">
+      <div className="mt-6 flex flex-col items-center justify-between gap-6 sm:mt-10 sm:flex-row">
         <div className="text-center sm:text-left">
           <div className="flex items-start justify-center sm:justify-start">
             <span className="font-sans text-8xl font-thin leading-none tracking-tighter sm:text-9xl md:text-[10rem]">
@@ -416,7 +418,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
       </div>
 
       {/* Bento Grid Stats Tiles */}
-      <dl className="mt-8 grid grid-cols-2 gap-4 border-t border-white/10 pt-8">
+      <dl className="mt-6 grid grid-cols-1 gap-4 border-t border-white/10 pt-6 sm:mt-8 sm:grid-cols-2 sm:pt-8">
         <motion.div
           whileHover={{ y: -2, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
           transition={{ duration: 0.2 }}
@@ -425,13 +427,15 @@ export function WeatherCard({ data, fetchedAt }: Props) {
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80">
             <Droplets size={20} aria-hidden />
           </div>
-          <div>
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+          <div className="min-w-0 flex-1">
+            <dt className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-white/40">
               Humidity
             </dt>
-            <dd className="mt-0.5 text-lg font-semibold tracking-tight">
+            <dd className="mt-0.5 text-lg font-semibold tracking-tight whitespace-nowrap">
               {weather.humidity.value}
-              <span className="text-sm font-normal text-white/60">{weather.humidity.unit}</span>
+              <span className="ml-1 text-sm font-normal text-white/60">
+                {weather.humidity.unit}
+              </span>
             </dd>
           </div>
         </motion.div>
@@ -444,11 +448,11 @@ export function WeatherCard({ data, fetchedAt }: Props) {
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80">
             <Wind size={20} aria-hidden />
           </div>
-          <div>
-            <dt className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+          <div className="min-w-0 flex-1">
+            <dt className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-white/40">
               Wind Force
             </dt>
-            <dd className="mt-0.5 text-lg font-semibold tracking-tight">
+            <dd className="mt-0.5 text-lg font-semibold tracking-tight whitespace-nowrap">
               {weather.wind_speed.value}
               <span className="ml-1 text-xs font-normal text-white/60">
                 {weather.wind_speed.unit}
@@ -458,7 +462,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
         </motion.div>
       </dl>
 
-      <footer className="mt-8 flex items-center justify-between text-[11px] text-white/40">
+      <footer className="mt-6 flex flex-col items-center justify-between gap-2 text-center text-[11px] text-white/40 sm:mt-8 sm:flex-row sm:text-left">
         <span>Intelligent Atmospheric Feed</span>
         <span>Last updated: {formatUpdated(fetchedAt)}</span>
       </footer>

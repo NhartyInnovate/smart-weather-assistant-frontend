@@ -17,12 +17,21 @@ export function WeatherSearch() {
   const [status, setStatus] = useState<Status>("idle");
   const [data, setData] = useState<WeatherResponse | null>(null);
   const [fetchedAt, setFetchedAt] = useState<number>(0);
+  const [errorType, setErrorType] = useState<string>("");
 
   const search = async (city: string) => {
+    const trimmed = city.trim();
+    if (!trimmed) {
+      setErrorType("CITY_NOT_FOUND");
+      setStatus("error");
+      return;
+    }
+
     setStatus("loading");
     setData(null);
+    setErrorType("");
     try {
-      const res = await fetchWeather(city);
+      const res = await fetchWeather(trimmed);
       setData(res);
       setFetchedAt(Date.now());
       setStatus("success");
@@ -33,6 +42,8 @@ export function WeatherSearch() {
       setWeather(condition, dayNight);
     } catch (err) {
       console.error(err);
+      const errorMessage = err instanceof Error ? err.message : "NETWORK_ERROR";
+      setErrorType(errorMessage);
       setStatus("error");
     }
   };
@@ -74,7 +85,7 @@ export function WeatherSearch() {
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <ErrorCard onRetry={() => setStatus("idle")} />
+                <ErrorCard errorType={errorType} onRetry={() => setStatus("idle")} />
               </motion.div>
             )}
             {status === "success" && data && (
