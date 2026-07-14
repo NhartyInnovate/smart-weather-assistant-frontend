@@ -116,7 +116,7 @@ export async function fetchWeather(city: string): Promise<WeatherResponse> {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 65000);
+  const timeoutId = setTimeout(() => controller.abort(), 75000);
 
   try {
     // 1. Try backend server if it is configured to a non-localhost address
