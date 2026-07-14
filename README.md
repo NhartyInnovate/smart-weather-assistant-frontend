@@ -8,9 +8,8 @@ A modern full-stack weather application that delivers real-time weather informat
 
 ## 🌐 Live Demo
 
-**Frontend:** https://YOUR-CLOUDFLARE-URL
-
-**Backend API:** https://YOUR-RENDER-URL
+**Frontend:** https://smart-weather-assistant-frontend.nkatugwa.workers.dev
+**Backend API:** https://smart-weather-assistant-backend.onrender.com
 
 ---
 
@@ -183,7 +182,7 @@ src/
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/smart-weather-assistant-frontend.git
+git clone https://github.com/NhartyInnovate/smart-weather-assistant-frontend.git
 ```
 
 ---
@@ -201,7 +200,7 @@ npm install
 Create a `.env` file.
 
 ```env
-VITE_WEATHER_API_URL=https://YOUR-BACKEND-URL.onrender.com
+VITE_WEATHER_API_URL=https://smart-weather-assistant-backend.onrender.com
 ```
 
 ---
