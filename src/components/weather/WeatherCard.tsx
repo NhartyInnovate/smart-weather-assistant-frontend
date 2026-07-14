@@ -1,6 +1,24 @@
-import { motion } from "framer-motion";
+import { animate, motion } from "framer-motion";
 import { Droplets, MapPin, Wind, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { WeatherResponse, WeatherCondition } from "@/types/weather";
+
+function AnimatedTemperature({ value }: { value: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 0.8,
+      ease: "easeOut",
+      onUpdate: (latest) => {
+        setDisplayValue(Math.round(latest));
+      },
+    });
+    return () => controls.stop();
+  }, [value]);
+
+  return <>{displayValue}</>;
+}
 
 interface Props {
   data: WeatherResponse;
@@ -368,9 +386,9 @@ export function WeatherCard({ data, fetchedAt }: Props) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, scale: 0.97, y: 30 }}
+      initial={{ opacity: 0, scale: 0.97, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 text-white shadow-2xl backdrop-blur-3xl sm:p-10"
       aria-label={`Weather in ${location.city}, ${location.country}`}
     >
@@ -400,7 +418,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
         <div className="text-center sm:text-left">
           <div className="flex items-start justify-center sm:justify-start">
             <span className="font-sans text-8xl font-thin leading-none tracking-tighter sm:text-9xl md:text-[10rem]">
-              {Math.round(weather.temperature.value)}
+              <AnimatedTemperature value={weather.temperature.value} />
             </span>
             <span className="mt-4 ml-1 text-2xl font-light text-white/60">
               {weather.temperature.unit}

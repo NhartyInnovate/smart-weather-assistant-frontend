@@ -104,7 +104,24 @@ export function WeatherSearch() {
             Type a city and press Enter. The interface will shift to match the sky.
           </p>
         </div>
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-3 w-full max-w-xl">
+            <span className="text-xs uppercase tracking-[0.2em] text-white/50">Try searching</span>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {["Abuja", "Lagos", "London", "Tokyo", "Cape Town"].map((city) => (
+                <motion.button
+                  key={city}
+                  whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.12)" }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => search(city)}
+                  disabled={status === "loading"}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-light text-white/90 backdrop-blur-md transition-colors hover:border-white/30 disabled:opacity-50 disabled:hover:scale-100"
+                >
+                  {city}
+                </motion.button>
+              ))}
+            </div>
+          </div>
           <SearchBar onSearch={search} disabled={status === "loading"} />
         </div>
 
