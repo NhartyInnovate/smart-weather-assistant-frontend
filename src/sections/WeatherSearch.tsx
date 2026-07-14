@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SearchBar } from "@/components/weather/SearchBar";
 import { LoadingOverlay } from "@/components/weather/LoadingOverlay";
 import { ErrorCard } from "@/components/weather/ErrorCard";
@@ -18,6 +18,26 @@ export function WeatherSearch() {
   const [data, setData] = useState<WeatherResponse | null>(null);
   const [fetchedAt, setFetchedAt] = useState<number>(0);
   const [errorType, setErrorType] = useState<string>("");
+  const [loadingPhase, setLoadingPhase] = useState<"short" | "long" | "connected">("short");
+  const [countdown, setCountdown] = useState<number>(60);
+
+  const longTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const cleanupTimers = () => {
+    if (longTimerRef.current) {
+      clearTimeout(longTimerRef.current);
+      longTimerRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return cleanupTimers;
+  }, []);
 
   const search = async (city: string) => {
     const trimmed = city.trim();
@@ -27,11 +47,34 @@ export function WeatherSearch() {
       return;
     }
 
+    cleanupTimers();
     setStatus("loading");
+    setLoadingPhase("short");
+    setCountdown(60);
     setData(null);
     setErrorType("");
+
+    let currentPhase: "short" | "long" | "connected" = "short";
+
+    longTimerRef.current = setTimeout(() => {
+      currentPhase = "long";
+      setLoadingPhase("long");
+    }, 3000);
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
     try {
       const res = await fetchWeather(trimmed);
+      cleanupTimers();
+
+      if (currentPhase === "long") {
+        setLoadingPhase("connected");
+        setCountdown(0);
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+
       setData(res);
       setFetchedAt(Date.now());
       setStatus("success");
@@ -41,6 +84,7 @@ export function WeatherSearch() {
 
       setWeather(condition, dayNight);
     } catch (err) {
+      cleanupTimers();
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : "NETWORK_ERROR";
       setErrorType(errorMessage);
@@ -74,7 +118,7 @@ export function WeatherSearch() {
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <LoadingOverlay />
+                <LoadingOverlay phase={loadingPhase} countdown={countdown} />
               </motion.div>
             )}
             {status === "error" && (
