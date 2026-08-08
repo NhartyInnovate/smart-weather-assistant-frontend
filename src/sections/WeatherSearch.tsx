@@ -20,6 +20,8 @@ export function WeatherSearch() {
   const [errorType, setErrorType] = useState<string>("");
   const [loadingPhase, setLoadingPhase] = useState<"short" | "long" | "connected">("short");
   const [countdown, setCountdown] = useState<number>(60);
+  const [isAutoDetected, setIsAutoDetected] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   const longTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -39,7 +41,7 @@ export function WeatherSearch() {
     return cleanupTimers;
   }, []);
 
-  const search = async (city: string) => {
+  const search = async (city: string, autoDetected = false) => {
     const trimmed = city.trim();
     if (!trimmed) {
       setErrorType("CITY_NOT_FOUND");
@@ -53,8 +55,9 @@ export function WeatherSearch() {
     setCountdown(60);
     setData(null);
     setErrorType("");
+    setIsAutoDetected(autoDetected);
 
-    let currentPhase: "short" | "long" | "connected" = "short";
+    let currentPhase: string = "short";
 
     longTimerRef.current = setTimeout(() => {
       currentPhase = "long";
@@ -78,10 +81,17 @@ export function WeatherSearch() {
       setData(res);
       setFetchedAt(Date.now());
       setStatus("success");
+      
+      if (!autoDetected) {
+        setRecentSearches((prev) => {
+          const newSearches = [trimmed, ...prev.filter((c) => c.toLowerCase() !== trimmed.toLowerCase())].slice(0, 5);
+          localStorage.setItem("recentSearches", JSON.stringify(newSearches));
+          return newSearches;
+        });
+      }
+
       const condition = mapWeatherCode(res.weather.weather_code);
-
       const dayNight = res.weather.is_day ? "day" : "night";
-
       setWeather(condition, dayNight);
     } catch (err) {
       cleanupTimers();
@@ -91,6 +101,40 @@ export function WeatherSearch() {
       setStatus("error");
     }
   };
+
+  useEffect(() => {
+    const stored = localStorage.getItem("recentSearches");
+    if (stored) {
+      try {
+        setRecentSearches(JSON.parse(stored));
+      } catch (e) {}
+    }
+
+    const hasVisited = sessionStorage.getItem("hasVisited");
+    if (!hasVisited && navigator.geolocation) {
+      sessionStorage.setItem("hasVisited", "true");
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            const res = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const data = await res.json();
+            const city = data.city || data.locality;
+            if (city) {
+              search(city, true);
+            }
+          } catch (error) {
+            console.error("Auto geolocation failed", error);
+          }
+        },
+        () => {
+          // Ignore
+        }
+      );
+    }
+  }, []); // Run once on mount
 
   return (
     <section id="search" className="relative px-6 py-24 text-white">
@@ -108,7 +152,7 @@ export function WeatherSearch() {
           <div className="flex flex-col items-center gap-3 w-full max-w-xl">
             <span className="text-xs uppercase tracking-[0.2em] text-white/50">Try searching</span>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              {["Abuja", "Lagos", "London", "Tokyo", "Cape Town"].map((city) => (
+              {["Abuja", "Lagos", "London", "Tokyo", "New York"].map((city) => (
                 <motion.button
                   key={city}
                   whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.12)" }}
@@ -121,8 +165,28 @@ export function WeatherSearch() {
                 </motion.button>
               ))}
             </div>
+            
+            {recentSearches.length > 0 && (
+              <>
+                <span className="mt-4 text-[10px] uppercase tracking-[0.2em] text-white/40">Recently Viewed</span>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {recentSearches.map((city) => (
+                    <motion.button
+                      key={`recent-${city}`}
+                      whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => search(city)}
+                      disabled={status === "loading"}
+                      className="rounded-full border border-white/5 bg-transparent px-3 py-1 text-xs font-light text-white/70 transition-colors hover:text-white/90 disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                      {city}
+                    </motion.button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
-          <SearchBar onSearch={search} disabled={status === "loading"} />
+          <SearchBar onSearch={(city) => search(city)} disabled={status === "loading"} />
         </div>
 
         <div className="mt-12">
@@ -133,7 +197,7 @@ export function WeatherSearch() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
               >
                 <LoadingOverlay phase={loadingPhase} countdown={countdown} />
               </motion.div>
@@ -144,7 +208,7 @@ export function WeatherSearch() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
               >
                 <ErrorCard errorType={errorType} onRetry={() => setStatus("idle")} />
               </motion.div>
@@ -155,9 +219,9 @@ export function WeatherSearch() {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -25, filter: "blur(4px)" }}
-                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] as const }}
               >
-                <WeatherCard data={data} fetchedAt={fetchedAt} />
+                <WeatherCard data={data} fetchedAt={fetchedAt} isAutoDetected={isAutoDetected} />
                 <RecommendationCard advice={data.advice} />
               </motion.div>
             )}

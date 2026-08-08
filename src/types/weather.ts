@@ -22,6 +22,13 @@ export interface WeatherResponse {
 
   advice: string;
 
+  hourly: Array<{
+    time: string;
+    temperature: number;
+    condition: string;
+    weather_code: number;
+  }>;
+
   metadata: {
     local_time: string;
     last_updated: string;

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CloudOff } from "lucide-react";
+import { CloudSlash } from "@phosphor-icons/react";
 
 interface Props {
   errorType?: string;
@@ -30,7 +30,7 @@ export function ErrorCard({ errorType, onRetry }: Props) {
     <motion.div
       initial={{ opacity: 0, scale: 0.98, y: 15 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
       className="relative mx-auto max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-3xl"
       role="alert"
       aria-live="assertive"
@@ -44,7 +44,7 @@ export function ErrorCard({ errorType, onRetry }: Props) {
         animate={{ y: [-4, 4, -4] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       >
-        <CloudOff className="text-white/80" size={24} aria-hidden />
+        <CloudSlash className="text-white/80" size={26} weight="duotone" aria-hidden />
       </motion.div>
 
       <h3 className="mt-6 text-xl font-light tracking-tight text-white sm:text-2xl">{title}</h3>

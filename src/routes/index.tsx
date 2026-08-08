@@ -12,13 +12,13 @@ import { Footer } from "@/sections/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Smart Weather Assistant — Experience the weather" },
+      { title: "Aero Weather — Intelligent Atmospheric Feed" },
       {
         name: "description",
         content:
           "A premium weather experience with live conditions, dynamic themes and smart recommendations.",
       },
-      { property: "og:title", content: "Smart Weather Assistant" },
+      { property: "og:title", content: "Aero Weather" },
       {
         property: "og:description",
         content: "Experience the weather, not just the forecast.",

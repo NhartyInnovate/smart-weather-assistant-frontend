@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { Search, CloudSun, Sparkles } from "lucide-react";
+import { MagnifyingGlass, CloudSun, Sparkle } from "@phosphor-icons/react";
 
 const STEPS = [
-  { icon: Search, title: "Search", body: "Type any city — anywhere in the world." },
+  { icon: MagnifyingGlass, title: "Search", body: "Type any city — anywhere in the world." },
   { icon: CloudSun, title: "Fetch Weather", body: "We pull the latest live conditions." },
-  { icon: Sparkles, title: "Receive Smart Advice", body: "Get a thoughtful recommendation." },
+  { icon: Sparkle, title: "Receive Smart Advice", body: "Get a thoughtful recommendation." },
 ];
 
 export function HowItWorks() {
@@ -31,8 +31,8 @@ export function HowItWorks() {
                 <span className="text-xs font-mono text-white/60">0{i + 1}</span>
                 <div className="h-px flex-1 bg-white/15" />
               </div>
-              <div className="mt-6 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15">
-                <s.icon aria-hidden />
+              <div className="mt-6 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white/90">
+                <s.icon size={22} weight="duotone" aria-hidden />
               </div>
               <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/75">{s.body}</p>

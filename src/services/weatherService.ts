@@ -97,6 +97,7 @@ function generateMockWeather(city: string): WeatherResponse {
       weather_code: weatherCode,
       is_day: isDay,
     },
+    hourly: [],
     advice: ADVICE_MAP[condition] || "Enjoy your day, whatever the weather!",
     metadata: {
       local_time: localTimeStr,
@@ -176,7 +177,7 @@ export async function fetchWeather(city: string): Promise<WeatherResponse> {
       const { latitude, longitude, name, country, timezone } = location;
 
       // B. Fetch forecast
-      const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m&timezone=${encodeURIComponent(timezone || "auto")}`;
+      const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=${encodeURIComponent(timezone || "auto")}`;
       let forecastRes;
       try {
         forecastRes = await fetch(forecastUrl, { signal: controller.signal });
@@ -205,6 +206,38 @@ export async function fetchWeather(city: string): Promise<WeatherResponse> {
         timeZone: timezone,
       });
 
+      // Process hourly data for the rest of today
+      const hourly = forecastData.hourly || {};
+      const hourly_forecast = [];
+      
+      if (hourly.time) {
+        const times = hourly.time;
+        const temps = hourly.temperature_2m;
+        const codes = hourly.weather_code;
+        
+        for (let i = 0; i < times.length; i++) {
+          const t = times[i];
+          const dt = new Date(t);
+          
+          const today = new Date();
+          // Reset minutes/seconds for comparison to include current hour
+          const compareDate = new Date(today);
+          compareDate.setMinutes(0, 0, 0);
+          
+          if (dt >= compareDate && dt.getDate() === today.getDate() && dt.getMonth() === today.getMonth() && dt.getFullYear() === today.getFullYear()) {
+            hourly_forecast.push({
+              time: dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              temperature: temps[i],
+              condition: mapWeatherCode(codes[i]),
+              weather_code: codes[i]
+            });
+            if (hourly_forecast.length >= 12) {
+              break;
+            }
+          }
+        }
+      }
+
       return {
         location: {
           city: name,
@@ -219,6 +252,7 @@ export async function fetchWeather(city: string): Promise<WeatherResponse> {
           weather_code: weatherCode,
           is_day: current.is_day === 1,
         },
+        hourly: hourly_forecast,
         advice: ADVICE_MAP[condition] || "Enjoy your day, whatever the weather!",
         metadata: {
           local_time: localTimeStr,

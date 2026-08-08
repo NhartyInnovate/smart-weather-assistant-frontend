@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { Activity, Palette, Sparkles } from "lucide-react";
+import { Lightning, Palette, Sparkle } from "@phosphor-icons/react";
 
 const FEATURES = [
   {
-    icon: Activity,
+    icon: Lightning,
     title: "Live Weather",
     body: "Real-time conditions pulled the moment you search, so you're always current.",
   },
@@ -13,7 +13,7 @@ const FEATURES = [
     body: "The interface transforms to match the sky above — sun, storm, snow or fog.",
   },
   {
-    icon: Sparkles,
+    icon: Sparkle,
     title: "Smart Recommendations",
     body: "Personal, actionable advice tailored to what the weather is actually doing.",
   },
@@ -40,8 +40,8 @@ export function Features() {
               transition={{ duration: 0.5, delay: i * 0.08 }}
               className="rounded-3xl border border-white/15 bg-white/10 p-8 backdrop-blur-xl"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15">
-                <f.icon aria-hidden />
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white/90">
+                <f.icon size={22} weight="duotone" aria-hidden />
               </div>
               <h3 className="mt-5 text-lg font-semibold">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/75">{f.body}</p>

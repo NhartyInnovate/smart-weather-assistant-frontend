@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown } from "@phosphor-icons/react";
 
 export function Hero() {
   const scroll = () => {
@@ -17,9 +17,9 @@ export function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-xs uppercase tracking-[0.35em] text-white/70"
+          className="text-xs uppercase tracking-[0.35em] text-white/70 font-semibold"
         >
-          Smart Weather Assistant
+          Aero Weather
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
@@ -55,7 +55,7 @@ export function Hero() {
           className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-slate-900 shadow-2xl transition hover:scale-[1.03] hover:bg-white/90"
         >
           Try It Now
-          <ArrowDown size={18} aria-hidden />
+          <ArrowDown size={18} weight="bold" aria-hidden />
         </motion.button>
       </div>
     </section>

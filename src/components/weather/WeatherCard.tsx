@@ -1,5 +1,5 @@
 import { animate, motion } from "framer-motion";
-import { Droplets, MapPin, Wind, Clock } from "lucide-react";
+import { MapPin, Wind, Clock, Drop } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import type { WeatherResponse, WeatherCondition } from "@/types/weather";
 
@@ -23,6 +23,7 @@ function AnimatedTemperature({ value }: { value: number }) {
 interface Props {
   data: WeatherResponse;
   fetchedAt: number;
+  isAutoDetected?: boolean;
 }
 
 function formatLocalTime(iso?: string) {
@@ -46,7 +47,7 @@ function AnimatedWeatherIcon({
   // SVG container variants
   const containerVariants = {
     initial: { scale: 0.8, opacity: 0 },
-    animate: { scale: 1, opacity: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+    animate: { scale: 1, opacity: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
   };
 
   switch (condition) {
@@ -380,7 +381,7 @@ function AnimatedWeatherIcon({
   }
 }
 
-export function WeatherCard({ data, fetchedAt }: Props) {
+export function WeatherCard({ data, fetchedAt, isAutoDetected }: Props) {
   const { location, weather } = data;
   const condition = weather.condition as WeatherCondition;
 
@@ -388,7 +389,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
     <motion.article
       initial={{ opacity: 0, scale: 0.97, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
       className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 text-white shadow-2xl backdrop-blur-3xl sm:p-10"
       aria-label={`Weather in ${location.city}, ${location.country}`}
     >
@@ -398,17 +399,22 @@ export function WeatherCard({ data, fetchedAt }: Props) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-            <MapPin size={12} className="text-white/70" aria-hidden />
+            <MapPin size={14} weight="duotone" className="text-white/70" aria-hidden />
             <span>{location.country}</span>
+            {isAutoDetected && (
+              <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/80">
+                Using your current location
+              </span>
+            )}
           </div>
           <h3 className="mt-1 text-3xl font-light tracking-tight text-white sm:text-4xl">
             {location.city}
           </h3>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium tracking-wide text-white/70 backdrop-blur-md">
-          <Clock size={12} aria-hidden />
+          <Clock size={14} weight="duotone" aria-hidden />
           <span className="whitespace-nowrap">
-            Local Time: {formatLocalTime(location.local_time)}
+            Local Time: {formatLocalTime(data.metadata?.local_time)}
           </span>
         </div>
       </header>
@@ -443,7 +449,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
           className="flex items-center gap-4 rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-md transition-colors"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80">
-            <Droplets size={20} aria-hidden />
+            <Drop size={22} weight="duotone" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
             <dt className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-white/40">
@@ -464,7 +470,7 @@ export function WeatherCard({ data, fetchedAt }: Props) {
           className="flex items-center gap-4 rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-md transition-colors"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80">
-            <Wind size={20} aria-hidden />
+            <Wind size={22} weight="duotone" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
             <dt className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-white/40">
@@ -479,6 +485,27 @@ export function WeatherCard({ data, fetchedAt }: Props) {
           </div>
         </motion.div>
       </dl>
+
+      {/* Hourly Forecast */}
+      {data.hourly && data.hourly.length > 0 && (
+        <div className="mt-6 border-t border-white/10 pt-6 sm:mt-8 sm:pt-8">
+          <h4 className="mb-4 text-xs font-bold uppercase tracking-wider text-white/50">Today</h4>
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+            {data.hourly.map((hour, idx) => (
+              <div
+                key={idx}
+                className="flex min-w-[70px] flex-col items-center justify-center gap-3 rounded-2xl bg-white/5 p-3 backdrop-blur-sm"
+              >
+                <span className="text-xs text-white/60">{hour.time}</span>
+                <span className="text-lg font-semibold">{Math.round(hour.temperature)}°</span>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-white/40 text-center leading-tight h-6 flex items-center">
+                  {hour.condition.replace(/ (Day|Night)$/i, "")}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <footer className="mt-6 flex flex-col items-center justify-between gap-2 text-center text-[11px] text-white/40 sm:mt-8 sm:flex-row sm:text-left">
         <span>Intelligent Atmospheric Feed</span>

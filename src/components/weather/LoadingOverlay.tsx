@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { Sparkle, CheckCircle } from "@phosphor-icons/react";
 
 interface Props {
   phase?: "short" | "long" | "connected";
@@ -49,7 +49,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
       initial={{ opacity: 0, scale: 0.97, y: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97, y: -30 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
       className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 text-white shadow-2xl backdrop-blur-3xl sm:p-10 flex flex-col items-center justify-center min-h-[460px]"
     >
       {/* Top micro-highlight glass line */}
@@ -68,7 +68,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
             initial={{ opacity: 0, scale: 0.9, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] as const }}
             className="flex flex-col items-center py-6 text-center"
           >
             <motion.div
@@ -77,7 +77,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
               className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500/30"
             >
-              <CheckCircle2 size={44} />
+              <CheckCircle size={44} weight="duotone" />
             </motion.div>
 
             <h3 className="mt-6 text-3xl font-light tracking-tight text-white">Connected</h3>
@@ -114,7 +114,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
                 animate={{ scale: [0.9, 1.1, 0.9] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Sparkles className="h-6 w-6 text-amber-300/80" />
+                <Sparkle className="h-6 w-6 text-amber-300/80" weight="duotone" />
               </motion.div>
             </div>
 
@@ -126,7 +126,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
                   initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
                   className="absolute inset-x-0 font-sans text-sm font-light tracking-wide text-white/85"
                 >
                   {MESSAGES[shortMsgIndex]}
@@ -179,7 +179,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
                 animate={{ scale: [0.9, 1.1, 0.9] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Sparkles className="h-6 w-6 text-amber-300/80" />
+                <Sparkle className="h-6 w-6 text-amber-300/80" weight="duotone" />
               </motion.div>
             </div>
 
@@ -238,7 +238,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
                     initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
                     animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
                     className="text-center text-sm font-light leading-relaxed text-white/80"
                   >
                     {FACTS[factIndex]}

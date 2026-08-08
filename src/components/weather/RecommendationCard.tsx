@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb } from "@phosphor-icons/react";
 
 export function RecommendationCard({ advice }: { advice: string }) {
   return (
     <motion.aside
       initial={{ opacity: 0, scale: 0.98, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] as const }}
       whileHover={{ y: -2 }}
       className="relative mx-auto mt-6 flex w-full max-w-2xl overflow-hidden items-start gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white backdrop-blur-3xl"
       aria-label="Smart recommendation"
@@ -25,7 +25,7 @@ export function RecommendationCard({ advice }: { advice: string }) {
           animate={{ rotate: [0, -5, 5, -5, 5, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Lightbulb size={20} className="relative z-10 text-amber-300" aria-hidden />
+          <Lightbulb size={22} weight="duotone" className="relative z-10 text-amber-300" aria-hidden />
         </motion.div>
       </div>
 
