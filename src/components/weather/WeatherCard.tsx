@@ -26,10 +26,26 @@ interface Props {
   isAutoDetected?: boolean;
 }
 
-function formatLocalTime(iso?: string) {
-  const d = iso ? new Date(iso) : new Date();
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+function formatLocalTime(timeStr?: string, timeZone?: string) {
+  if (!timeStr) return "—";
+
+  // If it's already a formatted time string (e.g., "11:30 PM" or "23:30"), return it directly
+  if (!timeStr.includes("T") && !timeStr.includes("-")) {
+    return timeStr;
+  }
+
+  const d = new Date(timeStr);
+  if (Number.isNaN(d.getTime())) return timeStr;
+
+  try {
+    return d.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: timeZone && timeZone !== "UTC" && timeZone !== "auto" ? timeZone : undefined,
+    });
+  } catch (e) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
 }
 
 function formatUpdated(ts: number) {
@@ -414,7 +430,7 @@ export function WeatherCard({ data, fetchedAt, isAutoDetected }: Props) {
         <div className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium tracking-wide text-white/70 backdrop-blur-md">
           <Clock size={14} weight="duotone" aria-hidden />
           <span className="whitespace-nowrap">
-            Local Time: {formatLocalTime(data.metadata?.local_time)}
+            Local Time: {formatLocalTime(data.metadata?.local_time, location.timezone)}
           </span>
         </div>
       </header>
