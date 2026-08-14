@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Sparkle, CheckCircle } from "@phosphor-icons/react";
+import { Planet, CheckCircle } from "@phosphor-icons/react";
 
 interface Props {
   phase?: "short" | "long" | "connected";
@@ -114,7 +114,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
                 animate={{ scale: [0.9, 1.1, 0.9] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Sparkle className="h-6 w-6 text-amber-300/80" weight="duotone" />
+                <Planet className="h-6 w-6 text-amber-300/80" weight="duotone" />
               </motion.div>
             </div>
 
@@ -179,7 +179,7 @@ export function LoadingOverlay({ phase = "short", countdown = 60 }: Props) {
                 animate={{ scale: [0.9, 1.1, 0.9] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Sparkle className="h-6 w-6 text-amber-300/80" weight="duotone" />
+                <Planet className="h-6 w-6 text-amber-300/80" weight="duotone" />
               </motion.div>
             </div>
 
